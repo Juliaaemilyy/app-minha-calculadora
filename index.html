@@ -1,0 +1,154 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+void main() {
+  runApp(const CalculatorApp());
+}
+
+class CalculatorApp extends StatelessWidget {
+  const CalculatorApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Calculadora Científica',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const CalculatorScreen(),
+    );
+  }
+}
+
+class CalculatorScreen extends StatefulWidget {
+  const CalculatorScreen({Key? key}) : super(key: key);
+
+  @override
+  _CalculatorScreenState createState() => _CalculatorScreenState();
+}
+
+class _CalculatorScreenState extends State<CalculatorScreen> {
+  String _output = "0";
+  String _currentInput = "";
+  double? _firstOperand;
+  String? _operator;
+
+  void _onButtonPressed(String value) {
+    setState(() {
+      if (value == "C") {
+        _output = "0";
+        _currentInput = "";
+        _firstOperand = null;
+        _operator = null;
+      } else if (value == "=") {
+        if (_operator != null && _firstOperand != null && _currentInput.isNotEmpty) {
+          double secondOperand = double.parse(_currentInput);
+          switch (_operator) {
+            case "+":
+              _output = (_firstOperand! + secondOperand).toString();
+              break;
+            case "-":
+              _output = (_firstOperand! - secondOperand).toString();
+              break;
+            case "*":
+              _output = (_firstOperand! * secondOperand).toString();
+              break;
+            case "/":
+              _output = (_firstOperand! / secondOperand).toString();
+              break;
+          }
+          _currentInput = "";
+          _firstOperand = null;
+          _operator = null;
+        }
+      } else if (value == "sin" || value == "cos" || value == "tan") {
+        if (_currentInput.isNotEmpty) {
+          double input = double.parse(_currentInput);
+          switch (value) {
+            case "sin":
+              _output = sin(input * pi / 180).toString();
+              break;
+            case "cos":
+              _output = cos(input * pi / 180).toString();
+              break;
+            case "tan":
+              _output = tan(input * pi / 180).toString();
+              break;
+          }
+          _currentInput = "";
+        }
+      } else if (value == "√") {
+        if (_currentInput.isNotEmpty) {
+          double input = double.parse(_currentInput);
+          _output = sqrt(input).toString();
+          _currentInput = "";
+        }
+      } else if (value == "x²") {
+        if (_currentInput.isNotEmpty) {
+          double input = double.parse(_currentInput);
+          _output = (input * input).toString();
+          _currentInput = "";
+        }
+      } else if (value == "x³") {
+        if (_currentInput.isNotEmpty) {
+          double input = double.parse(_currentInput);
+          _output = (input * input * input).toString();
+          _currentInput = "";
+        }
+      } else if (["+", "-", "*", "/"].contains(value)) {
+        if (_currentInput.isNotEmpty) {
+          _firstOperand = double.parse(_currentInput);
+          _operator = value;
+          _currentInput = "";
+        }
+      } else {
+        _currentInput += value;
+        _output = _currentInput;
+      }
+    });
+  }
+
+  Widget _buildButton(String value) {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: () => _onButtonPressed(value),
+        child: Text(
+          value,
+          style: const TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calculadora Científica'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              alignment: Alignment.bottomRight,
+              child: Text(
+                _output,
+                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          Column(
+            children: [
+              Row(children: ["7", "8", "9", "/"].map(_buildButton).toList()),
+              Row(children: ["4", "5", "6", "*"].map(_buildButton).toList()),
+              Row(children: ["1", "2", "3", "-"].map(_buildButton).toList()),
+              Row(children: ["C", "0", "=", "+"].map(_buildButton).toList()),
+              Row(children: ["sin", "cos", "tan"].map(_buildButton).toList()),
+              Row(children: ["√", "x²", "x³"].map(_buildButton).toList()), // New row with the functions
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
